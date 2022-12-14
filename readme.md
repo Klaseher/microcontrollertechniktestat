@@ -11,8 +11,8 @@
 ## Eigene Gedanken
 * Stundenanzeige nicht größer 23
 * Minutenanzeige nicht größer 59
-* Stell- und Timermodus (wird über Taste 3 geswitcht)
-* klingel über ISR
+* Stell- und Uhrmodus (wird über Taste 3 geswitcht)
+* 
 
 ## Variablen
 * stunden
@@ -33,7 +33,21 @@
 
 ```mermaid
 graph TD;
-    init(Initialisierung)
+    init-->stellmodus
     
-    init-->B;
+    subgraph init  
+        ports(Ports definieren)
+
+    end 
+
+    subgraph main
+        subgraph stellmodus
+            
+
+        end
+        subgraph Uhrmodus
+        
+        end
+    end
+
 ```
