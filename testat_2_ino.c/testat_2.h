@@ -16,7 +16,7 @@ h g f e d c b a
 
 // Zahlen
                 //hgfedcba
-#define NULL    0b00111111
+#define NUL     0b00111111
 #define EINS    0b00000110
 #define ZWEI    0b01011011
 #define DREI    0b01001111
@@ -28,7 +28,7 @@ h g f e d c b a
 #define NEUN    0b01101111
 #define PUNKT   0b10000000
 
-const byte numbers[] = {NULL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT, NEUN};
+const byte numbers[] = {NUL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT, NEUN};
 
 // Stelle der 7-Segment Anzeige
 #define STELLE1 0xF1
@@ -43,9 +43,9 @@ const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 #define STELLMODUS  0b1
 
 /* 7-Segment-Ports */
-#define DATENPORT_B   8
-#define TAKTPORT_D    7
-#define ANZEIGEPORT_D 4
+#define DATENPORT     8
+#define TAKTPORT      7
+#define ANZEIGEPORT   4
 
 // Tasten-Ports
 #define TASTE1  PC1
