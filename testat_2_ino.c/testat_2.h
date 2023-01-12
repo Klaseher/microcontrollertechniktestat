@@ -38,7 +38,7 @@ const byte numbers[] = {NUL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT,
 const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 
 // Modi
-#define TIMERMODUS  0b0
+#define UHRMODUS  0b0
 #define STELLMODUS  0b1
 
 /* 7-Segment-Ports */
@@ -57,7 +57,8 @@ const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 //Funktionen
 void WriteNumberToSegment(byte Segment, byte Value);
 void show_clock();
-void  AddMinute();
+void AddSecond();
+int AddMinute();
 int AddHour();
 
 #endif
