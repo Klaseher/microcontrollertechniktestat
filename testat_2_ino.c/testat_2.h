@@ -14,8 +14,7 @@
 h g f e d c b a
 */
 
-// Zahlen
-                //hgfedcba
+// Zahlen                //hgfedcba
 #define NUL     0b00111111
 #define EINS    0b00000110
 #define ZWEI    0b01011011
@@ -54,5 +53,11 @@ const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 
 // Timer-Ports
 #
+
+//Funktionen
+void WriteNumberToSegment(byte Segment, byte Value);
+void show_clock();
+void  AddMinute();
+int AddHour();
 
 #endif
