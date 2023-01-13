@@ -14,7 +14,12 @@
 h g f e d c b a
 */
 
-// Zahlen                //hgfedcba
+//Bitmanipulation
+#define BIT(b)      (1<<b)
+#define SET(x,y)    (x |= y)
+#define CLEAR(x,y)  (x &=~ y)
+
+// Zahlen       //hgfedcba
 #define NUL     0b00111111
 #define EINS    0b00000110
 #define ZWEI    0b01011011
@@ -38,13 +43,15 @@ const byte numbers[] = {NUL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT,
 const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 
 // Modi
-#define UHRMODUS  0b0
+#define UHRMODUS    0b0
 #define STELLMODUS  0b1
 
 /* 7-Segment-Ports */
-#define DATENPORT     8
-#define TAKTPORT      7
-#define ANZEIGEPORT   4
+#define DATA     BIT(0)
+#define CLOCK    BIT(7)
+#define LATCH    BIT(4)
+#define DATENPORT    8
+#define TAKTPORT    7
 
 // Tasten-Ports
 #define TASTE1  PC1
@@ -60,5 +67,6 @@ void show_clock();
 void AddSecond();
 int AddMinute();
 int AddHour();
+
 
 #endif
