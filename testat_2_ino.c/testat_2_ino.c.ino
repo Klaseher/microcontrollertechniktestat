@@ -2,9 +2,9 @@
 #include <avr/interrupt.h>
 
 // Zeitwerte
-int8_t hour = 10;   // Stundenwert
-int8_t minute = 34;  // Minutenwert
-int8_t second = 5; // Sekundenwert
+int8_t hour = 4;   // Stundenwert
+int8_t minute = 20;  // Minutenwert
+int8_t second = 0; // Sekundenwert
 
 int8_t modus = UHRMODUS;  // Variable, die den aktuellen Modus der Uhr bestimmt
 int8_t point = 1;         // bestimmt, ob der Punkt an der 2. Stelle angezeigt werden soll
@@ -99,26 +99,32 @@ int main()
         entry = 0;
       }
       else{
+        /* Entprellt und liest nach und nach jede Taste */
+        
+        // Taste 0 fügt eine Stunde hinzu
         Entprellen(0);
         if(Flanke[0] == 1 && Zustand[0] == 0){
           AddHour();
           Flanke[0] = 0;
         }
-        
+  
+        // Taste 1 fügt eine Minute hinzu
         Entprellen(1);
         if(Flanke[1] == 1 && Zustand[1] == 0){
           AddMinute();
           Flanke[1] = 0;
         }    
-  
+
+        // Taste 2 beendet den Stellmodus
         Entprellen(2);
         if(Flanke[2] == 1 && Zustand[2] == 0){
           entry = 1;
           Flanke[2] = 0;
-
-          // Warten bis der Interrupt wieder aktiviert wird, 
-          // da der Interrupt sonst direkt wieder erkannt wird
-          for(volatile unsigned long i = 0; i < 15000; i++)
+          second = 0;
+          
+          /* Warten bis der Interrupt wieder aktiviert wird, 
+          da der Interrupt sonst direkt wieder erkannt wird */
+          for(volatile unsigned long i = 0; i < 20000; i++)
             show_clock(); // 
 
           cli();
@@ -128,7 +134,8 @@ int main()
         }
       }
     }
-    
+
+    // Zeigt den aktuellen Stunden- und Minutenstand an
     show_clock();
   }
 }
@@ -150,12 +157,15 @@ void WriteNumberToSegment(byte segment, byte value)
 
   // Ausgabe der anzuzeigenden Ziffer  
   for (int i = 0; i < 8; i++) {
+    /* Sendet Bit in den DATA-Port */
     if (value & BIT(7)) {
       SET(PORTB, DATA);
     } 
     else {
       CLEAR(PORTB, DATA);
     }
+    
+    /* Nächstes Bit zum senden vorbereiten */
     value <<= 1;
 
     /* Bittakt bei jedem Bit */
@@ -165,13 +175,17 @@ void WriteNumberToSegment(byte segment, byte value)
 
   /* Ausgabe Stellenmuster auf DATA */
   for (int i = 0; i < 8; i++) {
+    /* Sendet Bit in den DATA-Port */
     if (segment & BIT(7)) {
       SET(PORTB, DATA);
     } else {
       CLEAR(PORTB, DATA);
     }
+    
+    /* Nächstes Bit zum senden vorbereiten */
     segment <<= 1;
 
+    /* Bittakt bei jedem Bit */
     SET(PORTD, CLOCK);
     CLEAR(PORTD, CLOCK);
   }
@@ -180,7 +194,7 @@ void WriteNumberToSegment(byte segment, byte value)
   SET(PORTD, LATCH);
 }
 
-/* Aktualisiert die aktuell angezeigte Uhrzeit an die entsprechenden Stellen */
+/* Aktualisiert die aktuell angezeigte Uhrzeit an den entsprechenden Stellen */
 void show_clock()
 {
   WriteNumberToSegment(0, hour / 10);
@@ -205,7 +219,8 @@ ISR(TIMER1_COMPA_vect)
   point = !point;
 }
 
-/* Sperrt Interrupts und aktiviert Stellmodus */
+/* ISR für Timer1 Compare-Match-Register A */
+// Aktiviert den Stellmodus
 ISR(PCINT1_vect)
 {
   if (modus == UHRMODUS){
@@ -213,6 +228,7 @@ ISR(PCINT1_vect)
     point = 1;
   }
   else{
+    // Keine Ahnung warum, aber wenn ich das drin lasse funktionierts besser
     modus = UHRMODUS;
   }
     
