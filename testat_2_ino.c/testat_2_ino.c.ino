@@ -63,8 +63,6 @@ void Entprellen(int8_t t)
   else {
     Counter[t]++;               /* erneut unverändert */
     if (Counter[t] == N) {      /* N-mal konstant -> Prellen zu Ende */
-        Serial.println("Flanke erkannt");  
-        Serial.println(T_neu);       
         Flanke[t] = 1;          /* registriere Aenderung */
     } 
     if (Counter[t] > N+1){
@@ -88,7 +86,6 @@ unsigned char liesTaste(int t)
 int main()
 {
   init();
-  Serial.begin(115200);
   while (1)
   {
     if (modus == STELLMODUS)
@@ -104,14 +101,12 @@ int main()
       else{
         Entprellen(0);
         if(Flanke[0] == 1 && Zustand[0] == 0){
-          Serial.println("Stunde"); 
           AddHour();
           Flanke[0] = 0;
         }
         
         Entprellen(1);
         if(Flanke[1] == 1 && Zustand[1] == 0){
-          Serial.println("Minute");   
           AddMinute();
           Flanke[1] = 0;
         }    
@@ -120,7 +115,6 @@ int main()
         if(Flanke[2] == 1 && Zustand[2] == 0){
           entry = 1;
           Flanke[2] = 0;
-          Serial.println("Ende"); 
 
           // Warten bis der Interrupt wieder aktiviert wird, 
           // da der Interrupt sonst direkt wieder erkannt wird
@@ -214,7 +208,6 @@ ISR(TIMER1_COMPA_vect)
 /* Sperrt Interrupts und aktiviert Stellmodus */
 ISR(PCINT1_vect)
 {
-  Serial.println("Interrupt");  
   if (modus == UHRMODUS){
     modus = STELLMODUS;
     point = 1;
