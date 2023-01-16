@@ -47,17 +47,19 @@ const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 #define STELLMODUS  0b1
 
 /* 7-Segment-Ports */
-#define DATA     BIT(0)
-#define CLOCK    BIT(7)
-#define LATCH    BIT(4)
+#define DATA    BIT(0)
+#define CLOCK   BIT(7)
+#define LATCH   BIT(4)
 
 // Tasten-Ports
 #define TASTE1  PC1
 #define TASTE2  PC2
-#define TASTE3  PC3
 
 // Timer-Ports
-#
+#define PRE256  BIT(2)
+#define INTOC1  BIT(1)
+#define TASTE3  BIT(3)
+#define PCIE1   BIT(1)
 
 //Funktionen
 void WriteNumberToSegment(byte Segment, byte Value);

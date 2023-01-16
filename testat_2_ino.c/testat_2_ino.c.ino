@@ -21,21 +21,24 @@ void init()
   cli();
 
   // Resetten der Timerregister
-  TCCR1A = 0b00000000;
-  TCCR1B = 0b00000000;
+  TCCR1A = 0;
+  TCCR1B = 0;
 
   // Prescaler auf 256
-  TCCR1B |= 0b00000100;
+  TCCR1B |= PRE256;
 
   // Halbe Sekunden Timer --> 16MHz Takt --> 62,5 ns pro takt * 256 = 16ms --> 500.000ms / 16ms = 31250 --> OCR1A = 31250
   OCR1A = 31250;  // Wert, mit dem TCNT1 verglichen werden soll
   TCNT1 = 0;      // Wert, der vom Timer hochgezählt wird
 
-  // Aktiviert den Interrupt für OCIE1A
-  TIMSK1 |= 0b00000010;
-  
-  PCMSK1 |= 0b00001000;
-  PCICR  |= 0b00000010;
+  // Aktiviert den Timer/Counter1, Output Compare A Match Interrupt (OCIE1A)
+  TIMSK1 |= INTOC1;
+
+  // Aktiviert Taste 3 für den Pin Change Interrupt
+  PCMSK1 |= TASTE3;
+
+  // Aktiviert den Pin Change Interrupt 1 (PCIE1)
+  PCICR  |= PCIE1;
 
   // Interrupts aktivieren
   sei();
@@ -60,6 +63,8 @@ void Entprellen(int8_t t)
   else {
     Counter[t]++;               /* erneut unverändert */
     if (Counter[t] == N) {      /* N-mal konstant -> Prellen zu Ende */
+        Serial.println("Flanke erkannt");  
+        Serial.println(T_neu);       
         Flanke[t] = 1;          /* registriere Aenderung */
     } 
     if (Counter[t] > N+1){
@@ -83,6 +88,7 @@ unsigned char liesTaste(int t)
 int main()
 {
   init();
+  Serial.begin(115200);
   while (1)
   {
     if (modus == STELLMODUS)
@@ -98,22 +104,29 @@ int main()
       else{
         Entprellen(0);
         if(Flanke[0] == 1 && Zustand[0] == 0){
-            AddHour();
-            Flanke[0] = 0;
+          Serial.println("Stunde"); 
+          AddHour();
+          Flanke[0] = 0;
         }
         
         Entprellen(1);
         if(Flanke[1] == 1 && Zustand[1] == 0){
-            AddMinute();
-            Flanke[1] = 0;
+          Serial.println("Minute");   
+          AddMinute();
+          Flanke[1] = 0;
         }    
   
         Entprellen(2);
         if(Flanke[2] == 1 && Zustand[2] == 0){
           entry = 1;
           Flanke[2] = 0;
-          
-          for(volatile unsigned long i = 0; i < 200000; i++);;
+          Serial.println("Ende"); 
+
+          // Warten bis der Interrupt wieder aktiviert wird, 
+          // da der Interrupt sonst direkt wieder erkannt wird
+          for(volatile unsigned long i = 0; i < 15000; i++)
+            show_clock(); // 
+
           cli();
           PCICR  |= 0x02;
           TIMSK1 |= 0x02;
@@ -201,6 +214,7 @@ ISR(TIMER1_COMPA_vect)
 /* Sperrt Interrupts und aktiviert Stellmodus */
 ISR(PCINT1_vect)
 {
+  Serial.println("Interrupt");  
   if (modus == UHRMODUS){
     modus = STELLMODUS;
     point = 1;
