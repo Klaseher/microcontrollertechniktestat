@@ -6,9 +6,9 @@ int8_t hour = 10;   // Stundenwert
 int8_t minute = 34;  // Minutenwert
 int8_t second = 5; // Sekundenwert
 
-int8_t modus = UHRMODUS; // Variable, die den aktuellen Modus der Uhr bestimmt
-bool point = true;  // bestimmt, ob der Punkt an der 2. Stelle angezeigt werden soll
-bool entry = true;
+int8_t modus = UHRMODUS;  // Variable, die den aktuellen Modus der Uhr bestimmt
+int8_t point = 1;         // bestimmt, ob der Punkt an der 2. Stelle angezeigt werden soll
+int8_t entry = 1;
 
 void init()
 {
@@ -17,10 +17,6 @@ void init()
   SET(DDRD, (CLOCK | LATCH));
   CLEAR(PORTD, (CLOCK | LATCH)); /* SHIFT und LATCH Low */
   
-  pinMode(TASTE1, INPUT);
-  pinMode(TASTE2, INPUT);
-  pinMode(TASTE3, INPUT);
-
   // Interrupts zum Einstellen deaktivieren
   cli();
 
@@ -45,42 +41,40 @@ void init()
   sei();
 }
 
-#define N 20                            /* muß hier 20 mal konstant sein */
+#define N 20                          /* muß hier 20 mal konstant sein */
 /* benötigte Variablen zur Tastenentprellung */
-unsigned char Zustand[3];       /* entprellter Zustand der Taste */
-unsigned char Flanke[3]={0,0,0};      /* 1 - wenn Flanke erkannt */
+uint8_t Zustand[3] = {0,0,0};         /* entprellter Zustand der Taste */
+uint8_t Flanke[3]  = {0,0,0};         /* 1 - wenn Flanke erkannt */
+uint8_t static Counter[3] = {0,0,0};  
 
 
 /* Routine zum Entprellen, muß zyklisch aufgerufen werden */
-void Entprellen (void)
+void Entprellen(int8_t t)
 {
-  unsigned char T_neu;                /* neuer Zustand der Taste */
-  static unsigned char T_alt = 0;     /* alter Zustand der Taste */
-  static int Counter;
-
-  for(int i = 0; i < 3; i++){
-    T_neu = liesTaste(i+1);                /* neuen Zustand der Taste abfragen */
-    if (T_neu != T_alt)
-        Counter = 0;                    /* Taste prellt noch */
-    else {
-        Counter++;                      /* erneut unverändert */
-        if (Counter == N) {             /* N-mal konstant -> Prellen zu Ende */
-            Zustand[i] = T_neu;       /* merke Tastenzustand */
-            Flanke[i] = 1;            /* registriere Aenderung */
-        } 
-        if (Counter > N+1)
-            Counter = N+1;              /* Zähler begrenzen */
+  uint8_t T_neu;                /* neuer Zustand der Taste */
+  uint8_t static T_alt[3]   = {0,0,0};  /* alter Zustand der Taste */
+  
+  T_neu = liesTaste(t+1);       /* neuen Zustand der Taste abfragen */
+  if (T_neu != T_alt[t])
+    Counter[t] = 0;             /* Taste prellt noch */
+  else {
+    Counter[t]++;               /* erneut unverändert */
+    if (Counter[t] == N) {      /* N-mal konstant -> Prellen zu Ende */
+        Flanke[t] = 1;          /* registriere Aenderung */
+    } 
+    if (Counter[t] > N+1){
+        Counter[t] = N+1;       /* Zähler begrenzen */
     }
+    T_alt[t] = T_neu;           /* aktuellen Zustand Taste merken */
   }
-  T_alt = T_neu;                       /* aktuellen Zustand Taste merken */
 }
 
 /* liest den Zustand der konkreten Taste aus und liefert ihn
    als binären Wert zurück (true - gedrückt) */
-unsigned char liesTaste(int taste) 
+unsigned char liesTaste(int t) 
 {
-  if ((PINC & (1 << taste)) != 0)
-    return 1;
+  if ((PINC & (1 << t)) != 0)
+    return 1;  
   else
     return 0;
 }
@@ -89,7 +83,6 @@ unsigned char liesTaste(int taste)
 int main()
 {
   init();
-  
   while (1)
   {
     if (modus == STELLMODUS)
@@ -97,22 +90,35 @@ int main()
       if (entry)
       {
         cli();
-        entry = false;
-      }
-      
-      Entprellen();
-      
-      if ((Flanke[1] == 1) && (Zustand[1] == 1))
-      {
-        Flanke[1] = 0; 
-        AddHour();
-      }
-      else if ((Flanke[2] == 1) && (Zustand[2] == 1))
-      {
-        Flanke[2] = 0; 
-        entry = true;
-        modus = UHRMODUS;
+        PCICR  &= 0;
+        TIMSK1 &= 0;
         sei();
+        entry = 0;
+      }
+      else{
+        Entprellen(0);
+        if(Flanke[0] == 1 && Zustand[0] == 0){
+            AddHour();
+            Flanke[0] = 0;
+        }
+        
+        Entprellen(1);
+        if(Flanke[1] == 1 && Zustand[1] == 0){
+            AddMinute();
+            Flanke[1] = 0;
+        }    
+  
+        Entprellen(2);
+        if(Flanke[2] == 1 && Zustand[2] == 0){
+          entry = 1;
+          Flanke[2] = 0;
+          
+          for(volatile unsigned long i = 0; i < 200000; i++);;
+          cli();
+          PCICR  |= 0x02;
+          TIMSK1 |= 0x02;
+          sei();
+        }
       }
     }
     
@@ -124,11 +130,11 @@ int main()
 /* Schreibt einen Dezimalwert zwischen 0-9 (Value) auf einer der 4 Stellen (Segment) der 7-Segment-Anzeige */
 void WriteNumberToSegment(byte segment, byte value)
 {
-  // Setzt den Punkt, falls das Boolean "point" true ist
+  // Setzt den Punkt, falls das point 1 ist
   if (segment == 1 && point)
-    value   = ~(numbers[value] | PUNKT);
+    value   = ~(nummer[value] | PUNKT);
   else
-    value   = ~numbers[value];
+    value   = ~nummer[value];
     
   segment = stellen[segment];
   
@@ -174,8 +180,6 @@ void show_clock()
   WriteNumberToSegment(1, hour % 10);
   WriteNumberToSegment(2, minute / 10);
   WriteNumberToSegment(3, minute % 10);
-  // WriteNumberToSegment(2, second / 10);
-  // WriteNumberToSegment(3, second % 10);
 }
 
 
@@ -197,8 +201,14 @@ ISR(TIMER1_COMPA_vect)
 /* Sperrt Interrupts und aktiviert Stellmodus */
 ISR(PCINT1_vect)
 {
-  modus = STELLMODUS;
-  point = true;
+  if (modus == UHRMODUS){
+    modus = STELLMODUS;
+    point = 1;
+  }
+  else{
+    modus = UHRMODUS;
+  }
+    
 }
 
 

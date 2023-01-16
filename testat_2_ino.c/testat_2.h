@@ -32,7 +32,7 @@ h g f e d c b a
 #define NEUN    0b01101111
 #define PUNKT   0b10000000
 
-const byte numbers[] = {NUL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT, NEUN};
+const byte nummer[] = {NUL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT, NEUN};
 
 // Stelle der 7-Segment Anzeige
 #define STELLE1 0xF1
@@ -50,8 +50,6 @@ const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 #define DATA     BIT(0)
 #define CLOCK    BIT(7)
 #define LATCH    BIT(4)
-#define DATENPORT    8
-#define TAKTPORT    7
 
 // Tasten-Ports
 #define TASTE1  PC1
