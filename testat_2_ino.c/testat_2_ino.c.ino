@@ -2,13 +2,13 @@
 #include <avr/interrupt.h>
 
 // Zeitwerte
-int8_t hour = 4;   // Stundenwert
-int8_t minute = 20;  // Minutenwert
-int8_t second = 0; // Sekundenwert
+int8_t hour = 4;    // Stundenwert
+int8_t minute = 20; // Minutenwert
+int8_t second = 0;  // Sekundenwert
 
-int8_t modus = UHRMODUS;  // Variable, die den aktuellen Modus der Uhr bestimmt
-int8_t point = 1;         // bestimmt, ob der Punkt an der 2. Stelle angezeigt werden soll
-int8_t entry = 1;
+int8_t modus;       // Variable, die den aktuellen Modus der Uhr bestimmt
+int8_t point = 1;   // bestimmt, ob der Punkt an der 2. Stelle angezeigt werden soll
+int8_t entry = 1;   // Steuert den Eingang in den Stellmodus
 
 void init()
 {
@@ -27,7 +27,7 @@ void init()
   // Prescaler auf 256
   TCCR1B |= PRE256;
 
-  // Halbe Sekunden Timer --> 16MHz Takt --> 62,5 ns pro takt * 256 = 16ms --> 500.000ms / 16ms = 31250 --> OCR1A = 31250
+  // Halbe Sekunden Timer --> 16MHz Takt --> 62,5 ns pro takt * 256 = 16µs --> 500.000µs / 16µs = 31250 --> OCR1A = 31250
   OCR1A = 31250;  // Wert, mit dem TCNT1 verglichen werden soll
   TCNT1 = 0;      // Wert, der vom Timer hochgezählt wird
 
@@ -42,6 +42,8 @@ void init()
 
   // Interrupts aktivieren
   sei();
+
+  modus = STELLMODUS;  // Variable, die den aktuellen Modus der Uhr bestimmt
 }
 
 #define N 20                          /* muß hier 20 mal konstant sein */
@@ -144,7 +146,7 @@ int main()
 /* Schreibt einen Dezimalwert zwischen 0-9 (Value) auf einer der 4 Stellen (Segment) der 7-Segment-Anzeige */
 void WriteNumberToSegment(byte segment, byte value)
 {
-  // Setzt den Punkt, falls das point 1 ist
+  // Setzt den Punkt, falls die Variable point 1 ist
   if (segment == 1 && point)
     value   = ~(nummer[value] | PUNKT);
   else
