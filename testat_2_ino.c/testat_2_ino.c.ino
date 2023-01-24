@@ -46,31 +46,30 @@ void init()
   modus = STELLMODUS;  // Variable, die den aktuellen Modus der Uhr bestimmt
 }
 
-#define N 20                          /* muß hier 20 mal konstant sein */
+
 /* benötigte Variablen zur Tastenentprellung */
 uint8_t Zustand[3] = {0,0,0};         /* entprellter Zustand der Taste */
 uint8_t Flanke[3]  = {0,0,0};         /* 1 - wenn Flanke erkannt */
 uint8_t static Counter[3] = {0,0,0};  
 
-
 /* Routine zum Entprellen, muß zyklisch aufgerufen werden */
 void Entprellen(int8_t t)
 {
-  uint8_t T_neu;                /* neuer Zustand der Taste */
+  uint8_t T_neu;                    /* neuer Zustand der Taste */
   uint8_t static T_alt[3]   = {0,0,0};  /* alter Zustand der Taste */
   
-  T_neu = liesTaste(t+1);       /* neuen Zustand der Taste abfragen */
+  T_neu = liesTaste(t+1);           /* neuen Zustand der Taste abfragen */
   if (T_neu != T_alt[t])
-    Counter[t] = 0;             /* Taste prellt noch */
+    Counter[t] = 0;                 /* Taste prellt noch */
   else {
-    Counter[t]++;               /* erneut unverändert */
-    if (Counter[t] == N) {      /* N-mal konstant -> Prellen zu Ende */
-        Flanke[t] = 1;          /* registriere Aenderung */
+    Counter[t]++;                   /* erneut unverändert */
+    if (Counter[t] == PRELLUNG) {   /* N-mal konstant -> Prellen zu Ende */
+        Flanke[t] = 1;              /* registriere Aenderung */
     } 
-    if (Counter[t] > N+1){
-        Counter[t] = N+1;       /* Zähler begrenzen */
+    if (Counter[t] > PRELLUNG+1){
+        Counter[t] = PRELLUNG+1;    /* Zähler begrenzen */
     }
-    T_alt[t] = T_neu;           /* aktuellen Zustand Taste merken */
+    T_alt[t] = T_neu;               /* aktuellen Zustand Taste merken */
   }
 }
 

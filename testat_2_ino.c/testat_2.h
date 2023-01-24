@@ -52,8 +52,9 @@ const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 #define LATCH   BIT(4)
 
 // Tasten-Ports
-#define TASTE1  PC1
-#define TASTE2  PC2
+#define TASTE1    PC1
+#define TASTE2    PC2
+#define PRELLUNG  20    /* muß hier 20 mal konstant sein */
 
 // Timer-Ports
 #define PRE256  BIT(2)
