@@ -14,11 +14,6 @@
 h g f e d c b a
 */
 
-//Bitmanipulation
-#define BIT(b)      (1<<b)
-#define SET(x,y)    (x |= y)
-#define CLEAR(x,y)  (x &=~ y)
-
 // Zahlen       //hgfedcba
 #define NUL     0b00111111
 #define EINS    0b00000110
@@ -42,25 +37,28 @@ const byte nummer[] = {NUL, EINS, ZWEI, DREI, VIER, FUENF, SECHS, SIEBEN, ACHT, 
 
 const byte stellen[] = {STELLE1, STELLE2, STELLE3, STELLE4};
 
+//Bitmanipulation
+#define BIT(b)      (1<<b)    // Setzt das Bit b
+#define SET(x,y)    (x |= y)  // Setzt ein Bit y eines Ports x
+#define CLEAR(x,y)  (x &=~ y) // Cleart das Bit y eines Ports x
+
 // Modi
 #define UHRMODUS    0b0
 #define STELLMODUS  0b1
 
 /* 7-Segment-Ports */
-#define DATA    BIT(0)
-#define CLOCK   BIT(7)
-#define LATCH   BIT(4)
+#define DATA    BIT(0)  // Datenregister auf PortB
+#define CLOCK   BIT(7)  // Clockregister auf PortD
+#define LATCH   BIT(4)  // Latchregister auf PortD
 
 // Tasten-Ports
-#define TASTE1    PC1
-#define TASTE2    PC2
-#define PRELLUNG  20    /* muß hier 20 mal konstant sein */
+#define TASTE3    BIT(3)  // Bit der dritten Taste beim PCICR
+#define PRELLUNG  30      // muß hier 20 mal konstant sein 
 
 // Timer-Ports
-#define PRE256  BIT(2)
-#define INTOC1  BIT(1)
-#define TASTE3  BIT(3)
-#define PCIE1   BIT(1)
+#define PRE256  BIT(2)  // wird genutzt um den Prescaler des Timer1 auf 256 zu setzen
+#define INTOC1  BIT(1)  // wird genutzt um den Output-Compare-Interrupt zu aktivieren
+#define PCIE1   BIT(1)  // wird genutzt um den Pin-Change-Interrupt zu aktivieren
 
 //Funktionen
 void WriteNumberToSegment(byte Segment, byte Value);

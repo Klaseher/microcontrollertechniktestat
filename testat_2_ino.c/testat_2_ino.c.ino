@@ -126,7 +126,7 @@ int main()
           /* Warten bis der Interrupt wieder aktiviert wird, 
           da der Interrupt sonst direkt wieder erkannt wird */
           for(volatile unsigned long i = 0; i < 20000; i++)
-            show_clock(); // 
+            show_clock(); 
 
           cli();
           PCICR  |= 0x02;
@@ -137,7 +137,7 @@ int main()
     }
 
     // Zeigt den aktuellen Stunden- und Minutenstand an
-    show_clock();
+    show_clock(); 
   }
 }
 
